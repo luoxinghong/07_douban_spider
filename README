@@ -1,0 +1,116 @@
+1. 自行启动一个爬取免费ip代理的程序 free_proxy_ip_pool
+该程序启动在百度云服务器http://106.12.8.109:5010端口上
+2. scrapy添加代理ip，可在middlewares.py文件中定义类
+class ProxyMiddleware(object):
+    def process_request(self, request, spider):
+        ip_port = requests.get("http://{}:{}/get/".format(settings.proxy_ip, settings.proxy_port)).json().get("proxy")
+        request.meta["proxy"] = 'http://' + ip_port
+        print(request.meta["proxy"])
+在setting的中间件中添加该类  ：     'douban_spider.middlewares.ProxyMiddleware': 1,  # 添加代理IP
+
+3. 代理ip有很多不可用，这时可以添加中间件
+from scrapy.downloadermiddlewares.retry import RetryMiddleware
+from scrapy.utils.response import response_status_message
+import time
+
+class MyRetryMiddleware(RetryMiddleware):
+    def delete_proxy(self, proxy):
+        if proxy:
+            requests.get("http://127.0.0.1:8090/delete/?proxy={}".format(proxy))
+
+    def process_response(self, request, response, spider):
+        if request.meta.get('dont_retry', False):
+            return response
+        if response.status in self.retry_http_codes:
+            reason = response_status_message(response.status)
+            # 删除该代理
+            self.delete_proxy(request.meta.get('proxy'))
+            time.sleep(random.randint(2, 5))
+            print('返回值异常, 进行重试...')
+            return self._retry(request, reason, spider) or response
+        return response
+
+    def process_exception(self, request, exception, spider):
+        if isinstance(exception, self.EXCEPTIONS_TO_RETRY) \
+                and not request.meta.get('dont_retry', False):
+            # 删除该代理
+            self.delete_proxy(request.meta.get('proxy'))
+            time.sleep(random.randint(3, 5))
+            print('连接异常, 进行重试...')
+            return self._retry(request, exception, spider)
+
+=====================================================电影信息及短评====================================================
+#豆瓣电影 API 指南
+https://www.jianshu.com/p/a7e51129b042
+1. 在调取豆瓣api2接口的时候，对html进行decode发现异常，经分析发现解码分为两种方式,常规decode(),还有就是decode('unicode_escape')
+
+2. 只能获取前500条短评
+
+=====================================================电影讨论=====================================================
+1. 需要用到代理，使用的是阿布云的HTTP隧道动态版
+
+2. discussion爬虫，只能使用代理，但是阿布云代理ip不怎么样，访问频率一旦高了就302，这时可以通过重启爬虫获取新的阿布云代，利用centos的定时任务crontab，同时为了实现断点续爬jobdir
+
+3. 配置
+class ABProxyMiddleware(object):
+    """ 阿布云ip代理配置 """
+    """ 阿布云ip代理配置，包括账号密码 """
+    proxyServer = "http://http-dyn.abuyun.com:9020"
+    proxyUser = "HK2H176QG3F017VD"
+    proxyPass = "28AE3DE6C65753A5"
+
+    # for Python3
+    proxyAuth = "Basic " + base64.urlsafe_b64encode(bytes((proxyUser + ":" + proxyPass), "ascii")).decode("utf8")
+
+    def process_request(self, request, spider):
+        request.meta["proxy"] = self.proxyServer
+        request.headers["Proxy-Authorization"] = self.proxyAuth
+
+DOWNLOADER_MIDDLEWARES = {
+    'douban_spider.middlewares.ABProxyMiddleware': 1,
+}
+
+# main.py
+cmdline.execute("scrapy crawl douban -s JOBDIR=./jobdir".split())
+
+# 注意需要cd到项目目录 且最好所有的都写绝对路径，尤其注意log文件路径
+#!/bin/sh
+cur_dateTime=`date "+%Y-%m-%d %H:%M:%S "`
+echo "${cur_dateTime}" >> /etc/logrotate.d/spider.log
+ps -ef|grep /home/lxh/07_douban_spider/main.py |grep -v grep
+if [ $? -ne 0 ]
+then
+echo "Start crawler 07_douban_spider....." >> /etc/logrotate.d/spider.log
+cd /home/lxh/07_douban_spider
+./run.sh
+else
+echo "07_douban_spider is runing....." >> /etc/logrotate.d/spider.log
+fi
+
+# run.sh
+#!/bin/bash
+nohup python3 /home/lxh/07_douban_spider/main.py > /home/lxh/07_douban_spider/logs/nohup.out 2>&1 &
+
+
+=====================================================电影问题=====================================================
+刚开始以为要获取豆瓣电影的问题的内容需要js加载，但是后面发现其实所有的内容都可以通过url获取到
+question_page_url = "https://movie.douban.com/subject/{}/questions/?start={}&type=all"
+question_answers_url = "https://movie.douban.com/subject/{}/questions/{}/answers/?start=0&limit=500&id="
+question_content_url = "https://movie.douban.com/subject/{}/questions/{}/"
+# 有回复的楼层的二楼回复地址
+second_floor_url = "https://movie.douban.com/subject/{}/questions/{}/answers/{}/comments/?start=0"
+
+1. 要访问这么多的url，必然而然需要通过代理IP，以此类推，设置定时任务和scrapy的断点续爬jobdir
+
+
+
+====================================遗留问题======================
+①访问电影二楼回复的时候没有使用scrapy的异步yield，而是直接用的requests。
+
+②阿布云购买的HTTP隧道动态版限制是每秒访问5次，但是我们为了能够最大的爬取内容，没有在setting中设置延时，到时是不是
+出现异常状态码，这时只能通过crontab定时检查爬虫进程。
+
+③
+
+爬到id   1296218
+有些id没爬到  看日志提取出来

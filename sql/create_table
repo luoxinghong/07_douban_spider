@@ -1,0 +1,61 @@
+CREATE TABLE `movie` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) DEFAULT NULL,
+  `movie_id` varchar(255) DEFAULT NULL,
+  `short_answers` longtext,
+  `recommendation_index` longtext,
+  `useful_num` longtext,
+  `scriptwriters` varchar(2000) DEFAULT NULL,
+  `directors` varchar(2000) DEFAULT NULL,
+  `actors` text,
+  `type` varchar(255) DEFAULT NULL,
+  `region` varchar(255) DEFAULT NULL,
+  `language` varchar(255) DEFAULT NULL,
+  `duration` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `release_date` varchar(255) DEFAULT NULL,
+  `source` varchar(255) DEFAULT NULL,
+  `alias` varchar(510) DEFAULT NULL,
+  `description` longtext CHARACTER SET utf8mb4,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `uuid` (`movie_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
+CREATE TABLE `discussion_info` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `movie_id` varchar(255) DEFAULT NULL,
+  `url` varchar(255) DEFAULT NULL,
+  `discussion_title` longtext CHARACTER SET utf8mb4,
+  `discussion_content` longtext CHARACTER SET utf8mb4,
+  `discussiones` longtext CHARACTER SET utf8mb4,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uurl` (`url`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `question_info` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `movie_id` varchar(255) DEFAULT NULL,
+  `url` varchar(255) DEFAULT NULL,
+  `question_title` longtext CHARACTER SET utf8mb4,
+  `question_content` longtext CHARACTER SET utf8mb4,
+  `answers` longtext,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uurl` (`url`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
+#  导出数据，使用Navicat Premium 12导出的数据导演列不是list
+
+show variables like '%secure%';   #查看安全导出目录
+
+select * from movie into outfile 'C://ProgramData//MySQL//MySQL Server 5.7//Uploads//movie.csv' fields terminated by ',' optionally      enclosed by '"' escaped by '"' lines terminated by '\r\n';
+
+select * from question_info into outfile 'C://ProgramData//MySQL//MySQL Server 5.7//Uploads//question_info.csv' fields terminated by ',' optionally      enclosed by '"' escaped by '"' lines terminated by '\r\n';
+
+select * from discussion_info into outfile 'C://ProgramData//MySQL//MySQL Server 5.7//Uploads//discussion_info.csv' fields terminated by ',' optionally      enclosed by '"' escaped by '"' lines terminated by '\r\n';
+
+
+select * from question_info into outfile '/var/lib/mysql-files/question_info.csv' fields terminated by ',' optionally      enclosed by '"' escaped by '"' lines terminated by '\r\n';
