@@ -9,7 +9,7 @@ autopep8==1.4.3
 Babel==2.6.0
 beautifulsoup4==4.6.3
 billiard==3.5.0.5
-bleach==2.1.2
+bleach==3.1.1
 bs4==0.0.1
 captcha-solver==0.0.3
 celery==4.2.1
