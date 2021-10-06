@@ -138,7 +138,7 @@ rsa==3.4.2
 Scrapy==1.5.1
 scrapy-redis==0.6.8
 scrapy-redis-bloomfilter==0.7.0
-scrapy-splash==0.7.2
+scrapy-splash==0.8.0
 SecretStorage==2.3.1
 selenium==3.6.0
 service-identity==17.0.0
