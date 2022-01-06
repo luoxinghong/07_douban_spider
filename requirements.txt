@@ -12,7 +12,7 @@ billiard==3.5.0.5
 bleach==2.1.2
 bs4==0.0.1
 captcha-solver==0.0.3
-celery==4.2.1
+celery==5.2.2
 certifi==2017.7.27.1f
 cffi==1.11.2
 chardet==2.3.0
