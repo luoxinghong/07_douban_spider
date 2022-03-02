@@ -135,7 +135,7 @@ reportlab==3.3.0
 requests==2.10.0
 retrying==1.3.3
 rsa==3.4.2
-Scrapy==1.5.1
+Scrapy==1.8.2
 scrapy-redis==0.6.8
 scrapy-redis-bloomfilter==0.7.0
 scrapy-splash==0.7.2
