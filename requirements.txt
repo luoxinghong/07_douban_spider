@@ -74,7 +74,7 @@ launchpadlib==1.10.4
 lazr.restfulclient==0.14.2
 lazr.uri==1.0.3
 lxml==4.1.1
-Mako==1.0.4
+Mako==1.2.2
 MarkupSafe==0.23
 #matplotlib==2.1.1
 mistune==0.8.3
