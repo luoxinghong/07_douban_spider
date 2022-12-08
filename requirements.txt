@@ -13,7 +13,7 @@ bleach==2.1.2
 bs4==0.0.1
 captcha-solver==0.0.3
 celery==4.2.1
-certifi==2017.7.27.1f
+certifi==2022.12.7
 cffi==1.11.2
 chardet==2.3.0
 click==6.7
